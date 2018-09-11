@@ -23,14 +23,14 @@
     src: "{{ role_path }}/files/permissioned-nodes_validator.json"
     dest: ~/alastria/tmp/permissioned-nodes_validator.json
     mode: 0755
-  when: not first_node
+#  when: not first_node
 
 - name: Copy general nodes file
   copy:
     src: "{{ playbook_dir }}/roles/alastria-regular-node/files/permissioned-nodes_general.json"
     dest: ~/alastria/tmp/permissioned-nodes_general.json
     mode: 0755
-  when: not first_node 
+#  when: not first_node 
 
 - name: copy password to file
   copy:
@@ -60,24 +60,24 @@
 
 - name: get bootnode
   shell: bootnode -genkey ~/alastria/data/geth/nodekey
-  when: not first_node
+#  when: not first_node
 
 - name: save enode in variable
   shell: bootnode -nodekey ~/alastria/data/geth/nodekey -writeaddress
   register: enode_key
-  when: not first_node
+#  when: not first_node
 
 - name: print enode key
   debug:
     msg: enode://{{enode_key.stdout}}@{{node_ip.stdout}}:21000?discport=0
-  when: not first_node  
+#  when: not first_node  
 
 - name: update permissioned nodes validator file
   replace:
     dest: ~/alastria/tmp/permissioned-nodes_validator.json
     regexp: 'discport=0"$'
     replace: 'discport=0",'
-  when: not first_node
+#  when: not first_node
 
 - name: add new permissioned node validator
   lineinfile:
@@ -85,22 +85,21 @@
     regexp: '$]$'
     insertbefore: '^]$'
     line: '    "enode://{{enode_key.stdout}}@{{node_ip.stdout}}:21000?discport=0"'
-  when: not first_node  
+#  when: not first_node  
 
 - name: Fetch permissioned node validator
   fetch:
     src: ~/alastria/tmp/permissioned-nodes_validator.json
     dest: "{{ role_path }}/files/"
     flat: yes
-  when: not first_node
+#  when: not first_node
 
-#Update Permissioned Nodes General
 - name: update permissioned nodes general file
   replace:
     dest: ~/alastria/tmp/permissioned-nodes_general.json
     regexp: 'discport=0"$'
     replace: 'discport=0",'
-  when: not first_node
+#  when: not first_node
 
 - name: add new permissioned node validator
   lineinfile:
@@ -108,29 +107,28 @@
     regexp: '$]$'
     insertbefore: '^]$'
     line: '    "enode://{{enode_key.stdout}}@{{node_ip.stdout}}:21000?discport=0"'
-  when: not first_node  
+#  when: not first_node  
 
 - name: Fetch permissioned node general file
   fetch:
     src: ~/alastria/tmp/permissioned-nodes_general.json
     dest: "{{ playbook_dir }}/roles/alastria-regular-node/files/"
     flat: yes
-  when: not first_node  
-#End
+#  when: not first_node  
 
 - name: copy permissioned nodes to node validator
   copy:
     src: "{{ role_path }}/files/permissioned-nodes_validator.json"
     dest: ~/alastria/data/permissioned-nodes.json
     mode: 0755
-  when: not first_node
+#  when: not first_node
 
 - name: copy static nodes to node validator
   copy:
     src: "{{ role_path }}/files/permissioned-nodes_validator.json"
     dest: ~/alastria/data/static-nodes.json
     mode: 0755  
-  when: not first_node
+#  when: not first_node
 
 - name: copy static nodes to first node validator
   copy:
