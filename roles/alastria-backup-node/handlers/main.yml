@@ -1,0 +1,4 @@
+---
+# handlers file for alastria-backup-node
+- name: run ldconfig
+  shell: ldconfig

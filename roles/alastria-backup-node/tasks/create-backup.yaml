@@ -1,0 +1,49 @@
+---
+- name: backup
+  debug:
+    msg: "Backing up current node keys"
+
+- name: get public ip
+  shell: dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null || curl -s --retry 2 icanhazip.com
+  register: node_ip
+
+- name: create backup directories
+  file:
+    path: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+    state: directory
+  with_items:
+    - { dest: '~/alastria-keysBackup', mode: '0440'}
+    - { dest: '~/alastria-keysBackup/data', mode: '0440'}
+    - { dest: '~/alastria-keysBackup/data/geth', mode: '0440'}
+    - { dest: '~/alastria-keysBackup/data/constellation', mode: '0440'}
+    - { dest: '~/alastria-keysBackup/data/keystore', mode: '0440'}
+
+- name: Copy constellation keys
+  copy:
+    src: ~/alastria/data/constellation/keystore
+    dest: ~/alastria-keysBackup/data/constellation
+    remote_src: yes
+  when: not validator
+
+- name: Copy node keys
+  copy:
+    src: "~/alastria/data/keystore/{{ item }}"
+    dest: ~/alastria-keysBackup/data/keystore
+    remote_src: yes
+  with_fileglob:
+      - UTC*
+
+- name: Copy enode ID
+  copy:
+    src: ~/alastria/data/geth/nodekey
+    dest: ~/alastria-keysBackup/data/geth/nodekey
+    remote_src: yes
+
+- name: save enode in variable
+  shell: bootnode -nodekey ~/alastria-keysBackup/data/geth/nodekey -writeaddress
+  register: enode_key
+
+- name: print enode key
+  debug:
+    msg: enode://{{enode_key.stdout}}@{{node_ip.stdout}}:21000?discport=0  

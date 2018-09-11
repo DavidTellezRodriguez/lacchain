@@ -1,0 +1,4 @@
+---
+# handlers file for alastria-regular-node
+- name: run ldconfig
+  shell: ldconfig

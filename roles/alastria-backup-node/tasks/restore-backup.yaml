@@ -1,0 +1,33 @@
+---
+- name: Recovering node keys
+  debug:
+    msg: "Recovering node keys"
+
+- name: delete files keys
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - { dest: '~/alastria/data/keystore/'}
+    - { dest: '~/alastria/data/geth/nodekey'}
+    - { dest: '~/alastria/data/constellation/keystore/'}
+
+- name: Recovery constellation keys
+  copy:
+    src: ~/alastria-keysBackup/data/constellation/keystore
+    dest: ~/alastria/data/constellation/
+
+- name: Recovery node keys
+  copy:
+    src: ~/alastria-keysBackup/data/keystore
+    dest: ~/alastria/data/
+    
+- name: Recovery enode ID
+  copy:
+    src: ~/alastria-keysBackup/data/geth/nodekey
+    dest: ~/alastria/data/geth/nodekey
+  
+- name: Clean backup files
+  file:
+    path: ~/alastria-keysBackup
+    state: absent
