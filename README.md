@@ -108,12 +108,12 @@ $ vi inventory
 If the node was created from scratch, then the step _Creating a new node_ modified several files, namely:
 
 * If the node was a validator, the following files were modified:
-	* [`data/permissioned-nodes_general.json`](data/permissioned-nodes_general.json)
-	* [`data/permissioned-nodes_validator.json`](data/permissioned-nodes_validator.json)
-	* [`data/static-nodes.json`](data/static-nodes.json)
+	* [`alastria-regular-node/files/permissioned-nodes_general.json`](data/permissioned-nodes_general.json)
+	* [`alastria-validator-node/files/permissioned-nodes_validator.json`](data/permissioned-nodes_validator.json)
+	* [`alastria-validator-node/files/static-nodes.json`](data/static-nodes.json)
 * If the node was regular, these files were modified instead:
-	* [`data/constellation-nodes.json`](data/constellation-nodes.json)
-	* [`data/permissioned-nodes_validator.json`](data/permissioned-nodes_validator.json)
+	* [`alastria-regular-node/files/constellation-nodes.json`](data/constellation-nodes.json)
+	* [`alastria-validator-node/files/permissioned-nodes_validator.json`](data/permissioned-nodes_validator.json)
 
 Note that the names of the files refer to the nodes that use them, **not** the nodes that have modified them during their creation.
 
@@ -133,7 +133,7 @@ $ systemctl start geth
 On the other hand, if the node is a validator, the rest of the nodes in the network must execute:
 
 ```
-$ systemctl start geth
+$ ansible-playbook -i inventory -e validator=yes -e regular=no --private-key=~/.ssh/id_rsa -u adrian site-everis-alastria-update.yml
 ```
 
 Then, the file `~/alastria/logs/quorum-XXX.log` of the new validator node will have the following error message:
@@ -159,7 +159,7 @@ Thus, the new node will be raised and synchronized with the network **if and onl
 > **NEVER MAKE A PROPOSAL WITHOUT FIRST UPDATING THE FILES MENTIONED IN: "Configuring the Quorum node file"**,after updating the files, you **need** to run the command:
 
 ```
-systemctl restart geth
+ansible-playbook -i inventory -e validator=yes -e regular=no --private-key=~/.ssh/id_rsa -u adrian site-everis-alastria-update.yml
 ```
 
 > **A VALIDATOR NODE MUST NEVER BE ELIMINATED WITHOUT PROPOSING THE REMOVAL THROUGH A PULL REQUEST SO THAT THE REST OF THE VALIDATING MEMBERS WILL REMOVE THEM FROM THEIR FILES (PERMISSIONED-NODES.JSON, STATIC-NODES.JSON) FIRST AND THEN PROCEEED TO A VOTING ROUND:**
@@ -167,16 +167,6 @@ systemctl restart geth
 ```
 > istanbul.propose("0x59d9F63451811C2c3C287BE40a2206d201DC3BfF", false);
 ```
-
-### Reinitialization of an existing node ###
-
-* If we already have an Alastria node installed on the machine, and we want to perform a clean initialization of the node keeping our **enode**, our constellation keys and our current accounts, we can execute:
-
-    ```
-    $ ./init.sh backup <<NODE_TYPE>> <<NODE_NAME>>
-    ```
-
-This will be the procedure to follow by the member nodes before infrastructure updates.
 
 ### Node Operation ###
 
@@ -196,9 +186,6 @@ $ systemctl restart geth
 ```
 $ ansible-playbook -i inventory -e validator=true --private-key=~/.ssh/id_rsa -u vagrant site-everis-alastria-backup.yml 
 ```
-
- * Existe un script `./scripts/clean.sh` que limpia el nodo actual y exige una resincronización del mismo al iniciarlo de nuevo. Esto solventa posibles errores de sincronización. Su efecto es el mismo que el de ejecutar directamente `./scripts/start.sh clean`
-
 
 **NOTE**
 If we want to generate the node using an enode and the keys of an existing node we must make a backup of the keys
