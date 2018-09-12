@@ -143,6 +143,12 @@ On the other hand, if the node is a validator, the rest of the nodes in the netw
 $ ansible-playbook -i inventory -e validator=yes -e regular=no --private-key=~/.ssh/id_rsa -u adrian site-everis-alastria-update.yml
 ```
 
+after the validator nodes add to the new validator node in their file of nodes allowed, execute in **remote machine** the next command:
+
+```
+<remote_machine>$ systemctl start geth
+```
+
 Then, the file `~/alastria/logs/quorum-XXX.log` of the new validator node will have the following error message:
 ```
 ERROR[12-19|12:25:05] Failed to decode message from payload    address=0x59d9F63451811C2c3C287BE40a2206d201DC3BfF err="unauthorized address"
