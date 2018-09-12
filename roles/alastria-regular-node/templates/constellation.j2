@@ -1,13 +1,15 @@
 #!/bin/bash
 
 # Externally accessible URL for this node (this is what's advertised)
-url = "http://{{ ansible_default_ipv4.address }}:9000/"
+url = "https://{{ node_ip.stdout }}:9000/"
 
 # Port to listen on for the public API "constellation_port"
 port = 9000
 
+workdir = "/root/alastria/data/constellation/"
+
 # Socket file to use for the private API / IPC
-socket = "/root/alastria/data/constellation/constellation.ipc"
+socket = "constellation.ipc"
 
 # Initial (not necessarily complete) list of other nodes in the network.
 # Constellation will automatically connect to other nodes not in this list
@@ -17,17 +19,17 @@ socket = "/root/alastria/data/constellation/constellation.ipc"
 othernodes = {% include "/files/constellation-nodes.json" %}
 
 # The set of public keys this node will host
-publickeys = ["/root/alastria/data/constellation/keystore/node.pub"]
+publickeys = ["keystore/node.pub"]
 
 # The corresponding set of private keys
-privatekeys = ["/root/alastria/data/constellation/keystore/node.key"]
+privatekeys = ["keystore/node.key"]
 
 # Optional file containing the passwords to unlock the given privatekeys
 # (one password per line -- add an empty line if one key isn't locked.)
 passwords = "/root/alastria/tmp/.account_pass"
 
 # Where to store payloads and related information
-storage = "/root/alastria/data/constellation/data"
+storage = "data"
 
 # Verbosity level (each level includes all prior levels)
 #   - 0: Only fatal errors

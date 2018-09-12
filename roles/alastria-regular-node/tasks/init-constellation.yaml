@@ -24,7 +24,7 @@
     path: ~/alastria/tmp/constellation-nodes.json
     regexp: '$]$'
     insertbefore: '^]$'
-    line: '    "http://{{node_ip.stdout}}:9000/"'
+    line: '    "https://{{node_ip.stdout}}:9000/"'
 
 - name: Fetch constellation_nodes updated
   fetch:
