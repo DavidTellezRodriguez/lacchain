@@ -2,6 +2,8 @@
 
 ## References
 
+* This Quorum network uses [IBFT](https://github.com/ethereum/EIPs/issues/650) consensus with validator and regular nodes located around Latin America and the Caribbean. 
+
 * In this installation we will use **Ubuntu 18.04** as the operating system and all the commands related to this operating system. In addition, links of the prerequisites will be placed in case it is required to install in another operating system.
 
 * An important consideration to note is that we will use Ansible, for which the installation is done from a local machine on a remote server. That means that the local machine and the remote server will communicate via ssh.
@@ -51,8 +53,8 @@ $ sudo apt-get install ansible
 To configure and install Quorum and Constellation, you must clone this git repository in your **local machine**.
 
 ```
-$ git clone https://github.com/alastria/alastria-node.git
-$ cd alastria-node/
+$ git clone https://github.com/everisblockchain/lacchain.git
+$ cd lacchain/
 ```
 
 ### Install Python ###
@@ -73,31 +75,36 @@ $ sudo apt-get install python-pip
 
 * There are two types of nodes (Validator / Regular) that can be created in the Quorum network.
 
-* First change the IP located within the **inventory file** by the public IP of the remote server where you are creating the node
+* After cloning the repository, enter this.
 
+    ```
+	$ cd lacchain/
+	``` 
 
-```
-$ vi inventory
-[test]
-192.168.10.72
-```
+* First change the IP located within the **inventory file** by the **public IP** of the remote server where you are creating the new node.
 
-* To deploy a validator node execute the following command in your local machine:
+	```
+	$ vi inventory
+	[test]
+	192.168.10.72
+	```
+
+* To deploy a **validator node** execute the following command in your **local machine**, without forgetting to set the private key in the option --private-key and the ssh connection user in the -u option:
 
 	```
 	$ ansible-playbook -i inventory -e first_node=false --private-key=~/.ssh/id_rsa -u vagrant site-everis-alastria-validator.yml
 	```
 
-* To deploy a regular node execute the following command in your local machine:
+* To deploy a **regular node** execute the following command in your **local machine**, without forgetting to set the private key in the option --private-key and the ssh connection user in the -u option:
 
 	```
 	$ ansible-playbook -i inventory --private-key=~/.ssh/id_rsa -u vagrant site-everis-alastria-regular.yml
 	```
-* When starting the installation, it will request that some data be entered, such as the public IP, node type, account, password and node name. The name of the node will be the one that will finally appear in the network monitoring tool.
+* When starting the installation, it will request that some data be entered, such as the public IP, geth account password and node name. The name of the node will be the one that will finally appear in the network monitoring tool.
 
-* At the end of the installation, if everything is correct, a GETH service will be created in the case of a validator node managed by Systemctl with **stop** status.
+* At the end of the installation, if everything is correct, a GETH service will be created in the case of a **validator node** managed by Systemctl with **stop** status.
 
-* In the case of a regular node if everything is correct, a CONSTELLATION service and a GETH service managed by Systemctl will be created with **stop** status.
+* In the case of a **regular node** if everything is correct, a CONSTELLATION service and a GETH service managed by Systemctl will be created with **stop** status.
 
 * Now, it is necessary to configure some files before starting up the node. Please, follow the next steps:
 
@@ -105,15 +112,15 @@ $ vi inventory
 
 ### Configuring the Quorum node file ###
 
-If the node was created from scratch, then the step _Creating a new node_ modified several files, namely:
+If the node was created from scratch, then the step _Creating a new node_ modified several files in the local repository, namely:
 
 * If the node was a validator, the following files were modified:
-	* [`alastria-regular-node/files/permissioned-nodes_general.json`](data/permissioned-nodes_general.json)
-	* [`alastria-validator-node/files/permissioned-nodes_validator.json`](data/permissioned-nodes_validator.json)
-	* [`alastria-validator-node/files/static-nodes.json`](data/static-nodes.json)
+	* [`roles/alastria-regular-node/files/permissioned-nodes_general.json`](roles/alastria-regular-node/files/permissioned-nodes_general.json)
+	* [`roles/alastria-validator-node/files/permissioned-nodes_validator.json`](roles/alastria-validator-node/files/permissioned-nodes_validator.json)
+	* [`roles/alastria-validator-node/files/static-nodes.json`](roles/alastria-validator-node/files/static-nodes.json)
 * If the node was regular, these files were modified instead:
-	* [`alastria-regular-node/files/constellation-nodes.json`](data/constellation-nodes.json)
-	* [`alastria-validator-node/files/permissioned-nodes_validator.json`](data/permissioned-nodes_validator.json)
+	* [`roles/alastria-regular-node/files/constellation-nodes.json`](roles/alastria-regular-node/files/constellation-nodes.json)
+	* [`roles/alastria-validator-node/files/permissioned-nodes_validator.json`](roles/alastria-validator-node/files/permissioned-nodes_validator.json)
 
 Note that the names of the files refer to the nodes that use them, **not** the nodes that have modified them during their creation.
 
@@ -121,11 +128,11 @@ In addition to these changes, which occur automatically when executing the node 
 
 ### Start up Regular Node ###
 
-Once we have modified these files, you can start up the node with this command:
+Once we have modified these files, you can start up the node with this command in **remote machine**:
 
 ```
-$ systemctl start constellation
-$ systemctl start geth
+<remote_machine>$ systemctl start constellation
+<remote_machine>$ systemctl start geth
 ```
 
 ### Start up Validator Node ####
@@ -172,13 +179,13 @@ ansible-playbook -i inventory -e validator=yes -e regular=no --private-key=~/.ss
 
  * Faced with errors in the node, we can choose to perform a clean restart of the node, for this we must execute the following commands:
 ```
-$ systemctl restart constellation
-$ systemctl restart geth
+<remote_machine>$ systemctl restart constellation
+<remote_machine>$ systemctl restart geth
 ```
 
  * Also, we have a restart script to update the node without stopping any processes (for example: before permissioned-nodes updates):
 ```
-$ systemctl restart geth
+<remote_machine>$ systemctl restart geth
 ```
 
  * The next statement allows you to back up the node's state. It also makes a backup copy of the keys and the enode of your node. All backup copies are stored in the home directory as `~/alastria-keysBackup`.
