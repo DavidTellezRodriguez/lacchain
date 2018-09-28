@@ -50,7 +50,7 @@ FROM ubuntu:16.04
 
 # Install add-apt-repository
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common && \
+    apt-get install -y --no-install-recommends software-properties-common build-essential netbase && \
     add-apt-repository ppa:ethereum/ethereum && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
