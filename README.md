@@ -108,6 +108,70 @@ $ sudo apt-get install python-pip
 
 * Now, it is necessary to configure some files before starting up the node. Please, follow the next steps:
 
+## Docker ##
+
+* If you did not clone the LACCHAIN repository in previous steps, then you need to clone it now.
+
+```
+$ git clone https://github.com/everisblockchain/lacchain.git
+$ cd lacchain/ 
+```
+
+### Docker Node Validator ###
+
+* First, you need to create a folder that will contain the files genesis.json, permissioned-nodes.json and static-nodes.json.
+* This folder will be the volume of the container on the host machine.
+
+```
+$ mkdir /alastria/data
+```
+
+* Copy the following files from lacchain:
+
+```
+$ cp /lacchain/roles/alastria-validator-node/files/genesis.json /alastria/data/genesis.json 
+$ cp /lacchain/roles/alastria-validator-node/files/permissioned-nodes_validator.json /alastria/data/permissioned-nodes.json
+$ cp /lacchain/roles/alastria-validator-node/files/static-nodes.json /alastria/data/static-nodes.json
+```
+
+* Now pull the docker image and run the container, setting your node identity and the folder location that will be the volume 
+
+```
+$ docker pull lacchain/validator:1.0.0 
+$ docker run -dit -p -e IDENTITY={YOUR_NODE_IDENTITY} -v {QUORUM_DIR}/alastria/data:/alastria/data 21000:21000 -p 22000:22000 -p 30303:30303 lacchain:1.0.0
+```
+
+### Docker Node Regular ###
+
+* First, you need to create a folder that will contain the configuration files to geth and constellation.
+* This folder will be the volume of the container on the host machine.
+
+```
+$ mkdir /alastria/data
+```
+
+* Copy the following files from lacchain:
+
+```
+$ cp /lacchain/roles/alastria-regular-node/files/genesis.json /alastria/data/genesis.json 
+$ cp /lacchain/roles/alastria-regular-node/files/permissioned-nodes_general.json /alastria/data/permissioned-nodes.json
+$ cp /lacchain/docker/regular/configuration.conf /alastria/configuration.conf
+$ cp /lacchain/docker/regular/start-node.sh /alastria/start-node.sh
+```
+
+* Create a password file to generate the constellation keys 
+
+```
+$ echo "Passw0rd" > /alastria/.account_pass
+```
+
+* Now pull the docker image and run the container, setting your node identity and the folder location that will be the volume 
+
+```
+$ docker pull lacchain/validator:1.0.0 
+$ docker run -dit -p -e IDENTITY={YOUR_NODE_IDENTITY} -v {QUORUM_DIR}/alastria:/alastria -p 9000:9000 21000:21000 -p 22000:22000 -p 30303:30303 lacchain/regular:1.0.0
+```
+
 ## Node Configuration
 
 ### Configuring the Quorum node file ###
@@ -137,13 +201,13 @@ Once we have modified these files, you can start up the node with this command i
 
 ### Start up Validator Node ####
 
-On the other hand, if the node is a validator, the rest of the nodes in the network must execute:
+On the other hand, if the node is a validator, the rest of the nodes in the network must execute to update permissioned-nodes.json file:
 
 ```
 $ ansible-playbook -i inventory -e validator=yes -e regular=no --private-key=~/.ssh/id_rsa -u adrian site-everis-alastria-update.yml
 ```
 
-after the validator nodes add to the new validator node in their file of nodes allowed, execute in **remote machine** the next command:
+after the validator nodes add to the new validator node in their *permissioned-nodes.json* file of nodes allowed, execute in **remote machine** the next command:
 
 ```
 <remote_machine>$ systemctl start geth
@@ -153,7 +217,7 @@ Then, the file `~/alastria/logs/quorum-XXX.log` of the new validator node will h
 ```
 ERROR[12-19|12:25:05] Failed to decode message from payload    address=0x59d9F63451811C2c3C287BE40a2206d201DC3BfF err="unauthorized address"
 ```
-This is because the rest of the validators in the network have not yet accepted the node as a validator. To request such acceptance we must take note of the node's address.
+This is because the rest of the validators in the network have not yet accepted the node as a validator. To request such acceptance we must take note of the node's address(0x59d9F63451811C2c3C287BE40a2206d201DC3BfF).
 
 ### Proposing a new validator node ###
 
@@ -165,6 +229,11 @@ This is because the rest of the validators in the network have not yet accepted 
 
 ```
 > istanbul.propose("0x59d9F63451811C2c3C287BE40a2206d201DC3BfF", true);
+```
+or
+```
+$ cd /alastria/data
+$ geth --exec 'istanbul.propose("0x59d9F63451811C2c3C287BE40a2206d201DC3BfF",true)' attach geth.ipc
 ```
 
 Thus, the new node will be raised and synchronized with the network **if and only if** over **50%** of the validator nodes vote in your nodes favor.
@@ -180,17 +249,16 @@ ansible-playbook -i inventory -e validator=yes -e regular=no --private-key=~/.ss
 ```
 > istanbul.propose("0x59d9F63451811C2c3C287BE40a2206d201DC3BfF", false);
 ```
-
+or
+```
+$ cd /alastria/data
+$ geth --exec 'istanbul.propose("0x59d9F63451811C2c3C287BE40a2206d201DC3BfF",true)' attach geth.ipc
+```
 ### Node Operation ###
 
- * Faced with errors in the node, we can choose to perform a clean restart of the node, for this we must execute the following commands:
+ * Faced with errors in the node, we can choose to perform a restart of the node, for this we must execute the following commands:
 ```
 <remote_machine>$ systemctl restart constellation
-<remote_machine>$ systemctl restart geth
-```
-
- * Also, we have a restart script to update the node without stopping any processes (for example: before permissioned-nodes updates):
-```
 <remote_machine>$ systemctl restart geth
 ```
 
