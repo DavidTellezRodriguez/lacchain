@@ -138,7 +138,7 @@ $ cp /lacchain/roles/alastria-validator-node/files/static-nodes.json /alastria/d
 
 ```
 $ docker pull lacchain/validator:1.0.0 
-$ docker run -dit -p -e IDENTITY={YOUR_NODE_IDENTITY} -v {QUORUM_DIR}/alastria/data:/alastria/data 21000:21000 -p 22000:22000 -p 30303:30303 lacchain:1.0.0
+$ docker run -dit -e IDENTITY={YOUR_NODE_IDENTITY} -v {QUORUM_DIR}/alastria/data:/alastria/data -p 21000:21000 -p 30303:30303 lacchain:1.0.0
 ```
 
 ### Docker Node Regular ###
@@ -168,8 +168,8 @@ $ echo "Passw0rd" > /alastria/.account_pass
 * Now pull the docker image and run the container, setting your node identity and the folder location that will be the volume 
 
 ```
-$ docker pull lacchain/validator:1.0.0 
-$ docker run -dit -p -e IDENTITY={YOUR_NODE_IDENTITY} -v {QUORUM_DIR}/alastria:/alastria -p 9000:9000 21000:21000 -p 22000:22000 -p 30303:30303 lacchain/regular:1.0.0
+$ docker pull lacchain/regular:1.0.0 
+$ docker run -dit -e IDENTITY={YOUR_NODE_IDENTITY} -v {QUORUM_DIR}/alastria:/alastria -p 9000:9000 21000:21000 -p 22000:22000 -p 30303:30303 lacchain/regular:1.0.0
 ```
 
 ## Node Configuration
