@@ -23,6 +23,6 @@
     - "wget"
     - "nmap-ncat"
     - "libsodium-devel"
-    - "libdb-devel"
+    - "zlib-devel"
     - "leveldb-devel"
     - "git"
